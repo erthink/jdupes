@@ -11,12 +11,15 @@ extern "C" {
 /* Select hash algorithm */
 //#define USE_HASH_JODYHASH /* jodyhash */
 //#define USE_HASH_XXHASH64 /* xxHash64 */
+//#define USE_HASH_T1HA /* t1ha (Fast Positive Hash) */
 
 /* Failsafes */
-#if !defined USE_HASH_JODYHASH && !defined USE_HASH_XXHASH64
-#define USE_HASH_JODYHASH
+#if !defined USE_HASH_JODYHASH && !defined USE_HASH_XXHASH64 && !defined USE_HASH_T1HA
+#define USE_HASH_T1HA
 #endif
-#if defined USE_HASH_JODYHASH && defined USE_HASH_XXHASH64
+#if (defined USE_HASH_JODYHASH && defined USE_HASH_XXHASH64) \
+  || (defined USE_HASH_JODYHASH && defined USE_HASH_T1HA)
+  || (defined USE_HASH_XXHASH64 && defined USE_HASH_T1HA)
 #error Multiple USE_HASH options
 #endif
 
@@ -65,6 +68,8 @@ extern "C" {
  typedef jodyhash_t jdupes_hash_t;
 #elif defined USE_HASH_XXHASH64
  typedef XXH64_hash_t jdupes_hash_t;
+#elif defined USE_HASH_T1HA
+ typedef uint64_t jdupes_hash_t;
 #endif
 
 /* Some types are different on Windows */

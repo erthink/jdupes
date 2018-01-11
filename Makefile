@@ -123,8 +123,8 @@ OBJS += $(ADDITIONAL_OBJECTS)
 
 all: jdupes
 
-jdupes: $(OBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(PROGRAM_NAME) $(OBJS)
+jdupes: $(OBJS) t1ha/libt1ha.a
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(PROGRAM_NAME) $^
 
 installdirs:
 	test -e $(DESTDIR)$(BIN_DIR) || $(MKDIR) $(DESTDIR)$(BIN_DIR)
@@ -144,3 +144,8 @@ distclean: clean
 
 package:
 	+./chroot_build.sh
+
+.PHONY: t1ha
+
+t1ha t1ha/libt1ha.a: t1ha/Makefile t1ha/t1ha.h $(wildcard t1ha/src/*)
+	$(MAKE) -C t1ha

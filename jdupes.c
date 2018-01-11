@@ -46,6 +46,8 @@
  #include "jody_hash.h"
 #elif defined USE_HASH_XXHASH64
  #include "xxhash.h"
+#elif defined USE_HASH_T1HA
+ #include "t1ha/t1ha.h"
 #else
  #error No USE_HASH is defined
 #endif
@@ -206,6 +208,9 @@ static const char *extensions[] = {
     #endif /* USE_JODY_HASH */
     #ifdef USE_HASH_XXHASH64
     "xxhash64",
+    #endif
+    #ifdef USE_HASH_T1HA
+    "t1ha",
     #endif
     #ifdef NO_PERMS
     "noperm",
@@ -1044,6 +1049,9 @@ static jdupes_hash_t *get_filehash(const file_t * const restrict checkfile,
 #ifdef USE_HASH_XXHASH64
   XXH64_state_t *xxhstate;
 #endif
+#ifdef USE_HASH_T1HA
+  uint64_t t1ha_blockchain;
+#endif
 
   if (checkfile == NULL || checkfile->d_name == NULL) nullptr("get_filehash()");
   LOUD(fprintf(stderr, "get_filehash('%s', %" PRIdMAX ")\n", checkfile->d_name, (intmax_t)max_read);)
@@ -1103,6 +1111,9 @@ static jdupes_hash_t *get_filehash(const file_t * const restrict checkfile,
   if (xxhstate == NULL) nullptr("xxhstate");
   XXH64_reset(xxhstate, 0);
 #endif
+#ifdef USE_HASH_T1HA
+  t1ha_blockchain = 0;
+#endif
 
   /* Read the file in CHUNK_SIZE chunks until we've read it all. */
   while (fsize > 0) {
@@ -1120,6 +1131,8 @@ static jdupes_hash_t *get_filehash(const file_t * const restrict checkfile,
     *hash = jody_block_hash(chunk, *hash, bytes_to_read);
 #elif defined USE_HASH_XXHASH64
     XXH64_update(xxhstate, chunk, bytes_to_read);
+#elif defined USE_HASH_T1HA
+  t1ha_blockchain = t1ha0(chunk, bytes_to_read, t1ha_blockchain);
 #endif
 
     if ((off_t)bytes_to_read > fsize) break;

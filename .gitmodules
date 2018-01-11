@@ -1,0 +1,3 @@
+[submodule "t1ha"]
+	path = t1ha
+	url = https://github.com/leo-yuriev/t1ha.git
